@@ -22,6 +22,7 @@ var (
 // getTestParcel возвращает тестовую посылку
 func getTestParcel() Parcel {
 	return Parcel{
+		Number:    25,
 		Client:    1000,
 		Status:    ParcelStatusRegistered,
 		Address:   "test",
@@ -33,9 +34,8 @@ func getTestParcel() Parcel {
 func TestAddGetDelete(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err, "Ошибка при подключении к БД")
+
 	defer db.Close()
 	// настройте подключение к БД
 
@@ -56,10 +56,9 @@ func TestAddGetDelete(t *testing.T) {
 
 	require.NoError(t, err, "Ошибка при получении посылки")
 
-	assert.Equal(t, getParcel.Client, parcel.Client)
-	assert.Equal(t, getParcel.Status, parcel.Status)
-	assert.Equal(t, getParcel.Address, parcel.Address)
-	assert.Equal(t, getParcel.CreatedAt, parcel.CreatedAt)
+	parcel.Number = getParcel.Number
+
+	assert.Equal(t, getParcel, parcel)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
@@ -77,9 +76,8 @@ func TestAddGetDelete(t *testing.T) {
 func TestSetAddress(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err, "Ошибка при подключении к БД")
+
 	defer db.Close()
 
 	store := NewParcelStore(db)
@@ -111,9 +109,8 @@ func TestSetAddress(t *testing.T) {
 func TestSetStatus(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err, "Ошибка при подключении к БД")
+
 	defer db.Close()
 
 	store := NewParcelStore(db)
@@ -143,9 +140,8 @@ func TestSetStatus(t *testing.T) {
 func TestGetByClient(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err, "Ошибка при подключении к БД")
+
 	defer db.Close()
 
 	parcels := []Parcel{
@@ -194,10 +190,6 @@ func TestGetByClient(t *testing.T) {
 		expected, ok := parcelMap[parcel.Number]
 		require.True(t, ok)
 
-		assert.Equal(t, expected.Number, parcel.Number)
-		assert.Equal(t, expected.Client, parcel.Client)
-		assert.Equal(t, expected.Status, parcel.Status)
-		assert.Equal(t, expected.Address, parcel.Address)
-		assert.Equal(t, expected.CreatedAt, parcel.CreatedAt)
+		assert.Equal(t, expected, parcel)
 	}
 }
